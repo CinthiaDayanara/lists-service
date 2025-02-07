@@ -1,13 +1,23 @@
-const { Sequelize } = require("sequelize");
+const { Client } = require('pg');
 
-const sequelize = new Sequelize({
-  host: 'database-1.cixz4yf0sjtl.us-east-1.rds.amazonaws.com',  // Dominio de tu base de datos RDS
-  dialect: 'postgres',
-  username: 'postgres',
-  password: 'DAYAc1234',
-  database: 'listas',
-  port: 5432, // O el puerto correcto de tu base de datos
-  logging: false, // Puedes activarlo para depuración
+// Configuración de conexión a PostgreSQL
+const client = new Client({
+  host: process.env.DB_SERVER,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 5432, // Por defecto el puerto de PostgreSQL es 5432
 });
 
-module.exports = sequelize;
+const connectDB = async () => {
+  try {
+    // Establecer la conexión con la base de datos
+    await client.connect();
+    console.log('Conectado a PostgreSQL');
+  } catch (error) {
+    console.error('Error al conectar a la base de datos', error);
+    process.exit(1); // Terminar el proceso si no se puede conectar
+  }
+};
+
+module.exports = connectDB;
