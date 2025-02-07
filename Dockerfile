@@ -15,4 +15,5 @@ COPY . .
 EXPOSE 5001
 
 # Comando de inicio
-CMD ["npm", "start"]
+#CMD ["npm", "start"]
+CMD ["node", "src/app.js"]

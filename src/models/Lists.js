@@ -1,11 +1,27 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+const pool = require('../config/database');
 
-const List = sequelize.define("List", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  board_id: { type: DataTypes.INTEGER, allowNull: false },
-  name: { type: DataTypes.STRING, allowNull: false },
-  position: { type: DataTypes.INTEGER, allowNull: false },
-});
+// Función para crear una lista en la base de datos
+const createList = async (name) => {
+  const query = 'INSERT INTO lists(name) VALUES($1) RETURNING *';
+  const values = [name];
 
-module.exports = List;
+  try {
+    const res = await pool.query(query, values);
+    return res.rows[0];  // Devuelve la lista recién creada
+  } catch (error) {
+    throw new Error('Error al crear la lista: ' + error.message);
+  }
+};
+
+// Función para obtener todas las listas
+const getLists = async () => {
+  const query = 'SELECT * FROM lists';
+  try {
+    const res = await pool.query(query);
+    return res.rows;  // Devuelve todas las listas
+  } catch (error) {
+    throw new Error('Error al obtener listas: ' + error.message);
+  }
+};
+
+module.exports = { createList, getLists };
