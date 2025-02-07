@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .  # Usar el directorio actual
-          file: ./docker/Dockerfile  # Especifica la ruta al Dockerfile si está en un subdirectorio (cámbialo si es necesario)
+          file: ./Dockerfile  # Especifica la ruta al Dockerfile si está en un subdirectorio (cámbialo si es necesario)
           push: true
           tags: ${{ env.IMAGE_NAME }}:latest
 
