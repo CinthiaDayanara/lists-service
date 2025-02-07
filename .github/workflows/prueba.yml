@@ -40,16 +40,16 @@ jobs:
 
             # Detener y eliminar el servicio si ya existe
             if sudo docker service ls --format '{{.Name}}' | grep -q lists-service; then
-              echo "🛑 Deteniendo y eliminando servicio existente..."
+              echo " Deteniendo y eliminando servicio existente..."
               sudo docker service rm lists-service
             fi
 
             # Limpiar imágenes antiguas
-            echo "🧹 Limpiando imágenes antiguas..."
+            echo " Limpiando imágenes antiguas..."
             sudo docker image prune -af || true
 
             # Descargar la última versión de la imagen desde Docker Hub
-            echo "📥 Descargando nueva imagen..."
+            echo " Descargando nueva imagen..."
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
             # Crear el servicio de Docker
