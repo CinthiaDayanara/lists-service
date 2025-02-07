@@ -9,7 +9,7 @@ on:
 env:
   IMAGE_NAME: dayanara1898/lists-service
   CONTAINER_NAME: lists-service-container
-  PORT: 5000
+  PORT: 5001
   
 jobs:
   build:
