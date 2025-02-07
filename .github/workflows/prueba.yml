@@ -1,77 +1,65 @@
-name: Docker Image CI
+name: Deploy to AWS
 
 on:
   push:
-    branches: [ "test" ]
-  pull_request:
-    branches: [ "test" ]
+    branches:
+      - test  # Puede ser cualquier rama a la que estés haciendo push
 
-env:
-  IMAGE_NAME: dayanara1898/lists-service
-  CONTAINER_NAME: lists-service-container
-  PORT: 5001
-  
 jobs:
-  build:
-    name: Build and Push Docker Image
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - name: Checkout del repositorio
+        uses: actions/checkout@v2
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Login en Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .  # Usar el directorio actual
-          file: ./Dockerfile  # Especifica la ruta al Dockerfile si está en un subdirectorio (cámbialo si es necesario)
-          push: true
-          tags: ${{ env.IMAGE_NAME }}:latest
-
-  deploy_to_ec2:
-    name: Deploy Updated Docker Container to EC2
-    runs-on: ubuntu-latest
-    needs: build  # 🔹 Corregido el nombre del job
-
-    steps:
-      - name: Set up SSH key
+      - name: Construir y subir imagen a Docker Hub
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/lists-service:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
-      - name: Update and Restart Docker Container
-        uses: appleboy/ssh-action@v0.1.6
+      - name: Conectar a AWS EC2 y desplegar
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_INSTANCE_1 }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY_M }}
           script: |
-            echo "Pulling the latest Docker image..."
-            docker pull ${{ env.IMAGE_NAME }}:latest
+            echo "🚀 Iniciando despliegue en AWS EC2..."
 
-            # Verifica si el contenedor ya está corriendo
-            if [ "$(docker ps -q -f name=${{ env.CONTAINER_NAME }})" ]; then
-              echo "Stopping and removing the old container..."
-              docker stop ${{ env.CONTAINER_NAME }}
-              docker rm ${{ env.CONTAINER_NAME }}
+            # Verificar si Docker está instalado y ejecutarlo si no está
+            if ! command -v docker &> /dev/null
+            then
+                echo "Docker no está instalado. Instalando..."
+                sudo yum install -y docker
+                sudo service docker start
             fi
 
-            echo "Removing old Docker images..."
-            docker image prune -f
+            # Detener y eliminar el servicio si ya existe
+            if sudo docker service ls --format '{{.Name}}' | grep -q lists-service; then
+              echo "🛑 Deteniendo y eliminando servicio existente..."
+              sudo docker service rm lists-service
+            fi
 
-            echo "Starting the new container..."
-            docker run -d -p ${{ env.PORT }}:${{ env.PORT }} \
-              --name ${{ env.CONTAINER_NAME }} \
-              -e DB_USER=${{ secrets.DB_USER }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e DB_SERVER=${{ secrets.DB_SERVER }} \
-              -e DB_NAME=${{ secrets.DB_NAME }} \
-              ${{ env.IMAGE_NAME }}:latest
+            # Limpiar imágenes antiguas
+            echo "🧹 Limpiando imágenes antiguas..."
+            sudo docker image prune -af || true
+
+            # Descargar la última versión de la imagen desde Docker Hub
+            echo "📥 Descargando nueva imagen..."
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+
+            # Crear el servicio de Docker
+            echo "🚀 Creando servicio de Docker..."
+            sudo docker service create --name lists-service \
+              --env DB_HOST=${{ secrets.DB_HOST }} \
+              --env DB_USER=${{ secrets.DB_USER }} \
+              --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              --env DB_NAME=${{ secrets.DB_NAME }} \
+              -p 6000:6000 \
+              ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+
+            echo "✅ Despliegue completado con éxito."
