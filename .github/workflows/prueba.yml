@@ -62,4 +62,4 @@ jobs:
               -p 6000:6000 \
               ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
-            echo "✅ Despliegue completado con éxito."
+            echo "Despliegue completado con éxito."
