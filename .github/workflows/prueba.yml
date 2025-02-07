@@ -55,7 +55,7 @@ jobs:
             # Crear el servicio de Docker
             echo "🚀 Creando servicio de Docker..."
             sudo docker service create --name lists-service \
-              --env DB_HOST=${{ secrets.DB_HOST }} \
+              --env DB_HOST=${{ secrets.DB_SERVER }} \
               --env DB_USER=${{ secrets.DB_USER }} \
               --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               --env DB_NAME=${{ secrets.DB_NAME }} \
