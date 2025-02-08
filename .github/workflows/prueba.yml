@@ -52,7 +52,7 @@ jobs:
             echo " Descargando nueva imagen..."
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
-            # Crear el servicio de Docker
+            # Crear el servicio de Docke
             echo "🚀 Creando servicio de Docker..."
             sudo docker service create --name lists-service \
               --env DB_HOST=${{ secrets.DB_SERVER }} \
