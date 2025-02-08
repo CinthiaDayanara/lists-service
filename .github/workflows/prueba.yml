@@ -3,7 +3,7 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - test  # Puede salqama a l
+      - test  # 
 
 jobs:
   deploy:
