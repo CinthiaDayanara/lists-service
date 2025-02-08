@@ -52,14 +52,12 @@ jobs:
             echo " Descargando nueva imagen..."
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
-            # Crear el servicio de Docke
-            echo "🚀 Creando servicio de Docker..."
-            sudo docker service create --name lists-service \
+            # Crear el contenedor de Docker
+            echo "🚀 Creando nuevo contenedor..."
+            sudo docker run -d --name lists-service \
               --env DB_HOST=${{ secrets.DB_SERVER }} \
               --env DB_USER=${{ secrets.DB_USER }} \
               --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               --env DB_NAME=${{ secrets.DB_NAME }} \
               -p 6000:6000 \
               ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
-
-            echo "Despliegue completado con éxito."
