@@ -55,7 +55,7 @@ jobs:
             # Crear el contenedor de Docker
             echo "🚀 Creando nuevo contenedor..."
             sudo docker run -d --name lists-service \
-              --env DB_HOST=${{ secrets.DB_SERVER }} \
+              --env DB_HOST=${{ secrets.DB_HOST }} \
               --env DB_USER=${{ secrets.DB_USER }} \
               --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               --env DB_NAME=${{ secrets.DB_NAME }} \
