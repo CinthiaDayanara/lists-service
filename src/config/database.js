@@ -1,23 +1,14 @@
-const { Client } = require('pg');
+const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-// Configuración de conexión a PostgreSQL
-const client = new Client({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 5432, // Por defecto el puerto de PostgreSQL es 5432
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_HOST,
+    dialect: 'postgres',
+    logging: false
 });
 
-const connectDB = async () => {
-  try {
-    // Establecer la conexión con la base de datos
-    await client.connect();
-    console.log('Conectado a PostgreSQL');
-  } catch (error) {
-    console.error('Error al conectar a la base de datos', error);
-    process.exit(1); // Terminar el proceso si no se puede conectar
-  }
-};
+sequelize.authenticate()
+    .then(() => console.log('✅ Conexión a la base de datos exitosa'))
+    .catch(err => console.error('❌ Error al conectar a la base de datos:', err));
 
-module.exports = connectDB;
+module.exports = sequelize;
