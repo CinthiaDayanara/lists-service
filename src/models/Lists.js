@@ -1,9 +1,8 @@
-const pool = require('../config/database');  // Importamos pool
+const pool = require('../config/database'); // ✅ Verifica que este archivo existe
 
 const List = {
-    createList: async (nombre, descripcion = null) => {  // Debe coincidir con la DB
+    createList: async (nombre, descripcion = null) => {
         try {
-            console.log('🔍 pool:', pool);  // Para depurar si pool está importado correctamente
             const query = 'INSERT INTO listas (nombre, descripcion) VALUES ($1, $2) RETURNING *';
             const result = await pool.query(query, [nombre, descripcion]);
             return result.rows[0];
@@ -24,4 +23,4 @@ const List = {
     }
 };
 
-module.exports = List;
+module.exports = List; // ✅ Asegúrate de que esto esté presente
