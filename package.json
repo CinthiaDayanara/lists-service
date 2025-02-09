@@ -12,7 +12,7 @@
   "name": "lists-service",
   "version": "1.0.0",
   "description": "This microservice allows **creating lists** in a task management system.\r It provides a REST API for adding new lists to the system and storing them in the database.",
-  "main": "index.js",
+  "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
