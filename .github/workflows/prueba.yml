@@ -3,7 +3,7 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - test  
+      - test 
 
 jobs:
   deploy:
@@ -18,46 +18,54 @@ jobs:
 
       - name: Construir y subir imagen a Docker Hub
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/lists-service:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest
 
       - name: Conectar a AWS EC2 y desplegar
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_INSTANCE_1 }}
+          host: ${{ secrets.EC2_INSTANCE_1}}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY}}
           script: |
             echo "🚀 Iniciando despliegue en AWS EC2..."
 
-            # Verificar si Docker está instalado y ejecutarlo si no está
+            # Verificar si Docker está instalado, y si no, instalarlo
             if ! command -v docker &> /dev/null
             then
-                echo "Docker no está instalado. Instalando..."
+                echo "🐳 Docker no está instalado. Instalándolo..."
                 sudo yum install -y docker
                 sudo service docker start
+                sudo usermod -aG docker $USER
             fi
 
-            # Detener y eliminar el servicio si ya existe
-            if sudo docker service ls --format '{{.Name}}' | grep -q lists-service; then
-              echo " Deteniendo y eliminando servicio existente..."
-              sudo docker service rm lists-service
+            # Asegurar que Docker está corriendo
+            sudo systemctl enable docker
+            sudo systemctl start docker
+
+            # Detener y eliminar el contenedor si ya existe
+            if sudo docker ps -a --format '{{.Names}}' | grep -q edit_user_microservice_container; then
+              echo "🛑 Deteniendo y eliminando contenedor existente..."
+              sudo docker stop edit_user_microservice_container || true
+              sudo docker rm edit_user_microservice_container || true
             fi
 
-            # Limpiar imágenes antiguas
-            echo " Limpiando imágenes antiguas..."
+            # Remover imágenes antiguas para evitar acumulación
+            echo "🧹 Limpiando imágenes antiguas..."
             sudo docker image prune -af || true
 
             # Descargar la última versión de la imagen desde Docker Hub
-            echo " Descargando nueva imagen..."
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+            echo "📥 Descargando nueva imagen..."
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest
 
-            # Crear el contenedor de Docker
-            echo "🚀 Creando nuevo contenedor..."
-            sudo docker run -d --name lists-service \
-              --env DB_HOST=${{ secrets.DB_HOST }} \
-              --env DB_USER=${{ secrets.DB_USER }} \
+            # Ejecutar el nuevo contenedor con las variables de entorno
+            echo "🚀 Ejecutando nuevo contenedor..."
+            sudo docker run -d --name edit_user_microservice_container \
+              --env DB_USER=${{ secrets.DB_USER}} \
               --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              --env DB_NAME=${{ secrets.DB_NAME }} \
-              -p 6000:6000 \
-              ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+              --env DB_SERVER=${{ secrets.DB_HOST}} \
+              --env DB_NAME=${{ secrets.DB_NAME}} \
+              -p 5001:5001 \
+              ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest
+
+            echo "✅ Despliegue completado con éxito."
