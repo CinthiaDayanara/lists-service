@@ -18,15 +18,15 @@ jobs:
 
       - name: Construir y subir imagen a Docker Hub
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/lists-service:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
       - name: Conectar a AWS EC2 y desplegar
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_INSTANCE_1}}
+          host: ${{ secrets.EC2_INSTANCE_1 }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY}}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "🚀 Iniciando despliegue en AWS EC2..."
 
@@ -44,10 +44,10 @@ jobs:
             sudo systemctl start docker
 
             # Detener y eliminar el contenedor si ya existe
-            if sudo docker ps -a --format '{{.Names}}' | grep -q edit_user_microservice_container; then
+            if sudo docker ps -a --format '{{.Names}}' | grep -q lists-service; then
               echo "🛑 Deteniendo y eliminando contenedor existente..."
-              sudo docker stop edit_user_microservice_container || true
-              sudo docker rm edit_user_microservice_container || true
+              sudo docker stop lists-service || true
+              sudo docker rm lists-service || true
             fi
 
             # Remover imágenes antiguas para evitar acumulación
@@ -56,16 +56,16 @@ jobs:
 
             # Descargar la última versión de la imagen desde Docker Hub
             echo "📥 Descargando nueva imagen..."
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
             # Ejecutar el nuevo contenedor con las variables de entorno
             echo "🚀 Ejecutando nuevo contenedor..."
-            sudo docker run -d --name edit_user_microservice_container \
-              --env DB_USER=${{ secrets.DB_USER}} \
+            sudo docker run -d --name lists-service \
+              --env DB_USER=${{ secrets.DB_USER }} \
               --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              --env DB_SERVER=${{ secrets.DB_HOST}} \
-              --env DB_NAME=${{ secrets.DB_NAME}} \
+              --env DB_HOST=${{ secrets.DB_HOST }} \
+              --env DB_NAME=${{ secrets.DB_NAME }} \
               -p 5001:5001 \
-              ${{ secrets.DOCKER_USERNAME }}/edit_user_microservice_image:latest
+              ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
 
             echo "✅ Despliegue completado con éxito."
