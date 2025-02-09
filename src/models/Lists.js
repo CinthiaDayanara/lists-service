@@ -8,12 +8,12 @@ const List = sequelize.define('List', {
     }
 });
 
-// Método para crear una lista
+// Método para crear una lista con Sequelize
 List.createList = async (name) => {
     return await List.create({ name });
 };
 
-// Método para obtener todas las listas
+// Método para obtener todas las listas con Sequelize
 List.getLists = async () => {
     return await List.findAll();
 };
