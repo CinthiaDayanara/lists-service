@@ -1,21 +1,17 @@
-const { Pool } = require('pg');  // Importamos Pool desde pg
-require('dotenv').config();  // Cargar variables de entorno
+const { Pool } = require('pg');
+require('dotenv').config(); // ✅ Cargar variables de entorno
 
-// Crear la conexión con PostgreSQL
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
-    port: 5432,
-    max: 20,  // Número máximo de conexiones
-    idleTimeoutMillis: 30000,  // Tiempo máximo de inactividad
-    connectionTimeoutMillis: 2000  // Tiempo máximo de espera para conexión
+    port: process.env.DB_PORT || 5432,
+    ssl: false, // ❗ Si estás usando RDS en AWS, cambia esto a { rejectUnauthorized: false }
 });
 
-// Verificar conexión a la base de datos
 pool.connect()
-    .then(() => console.log('✅ Conexión a PostgreSQL exitosa'))
+    .then(() => console.log('✅ Conectado a PostgreSQL'))
     .catch(err => console.error('❌ Error al conectar a PostgreSQL:', err));
 
-module.exports = pool;  // Exportamos pool para ser utilizado en otros archivos
+module.exports = pool;
