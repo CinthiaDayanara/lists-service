@@ -18,8 +18,8 @@ jobs:
 
       - name: Construir y subir imagen a Docker Hub
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}lists-service:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}lists-service2:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/lists-service2:latest
 
       - name: Conectar a AWS EC2 y desplegar
         uses: appleboy/ssh-action@master
@@ -31,10 +31,10 @@ jobs:
             echo "🚀 Iniciando despliegue en AWS EC2..."
 
             # Detener y eliminar el contenedor si ya existe
-            if sudo docker ps -a --format '{{.Names}}' | grep -q lists-service_container; then
+            if sudo docker ps -a --format '{{.Names}}' | grep -q lists-service2_container; then
               echo "🛑 Deteniendo y eliminando contenedor existente..."
-              sudo docker stop lists-service_container
-              sudo docker rm lists-service_container
+              sudo docker stop lists-service2_container
+              sudo docker rm lists-service2_container
             fi
 
             # Remover imágenes antiguas para evitar acumulación
@@ -43,16 +43,16 @@ jobs:
 
             # Descargar la última versión de la imagen desde Docker Hub
             echo "📥 Descargando nueva imagen..."
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lists-service2:latest
 
             # Ejecutar el nuevo contenedor con las variables de entorno
             echo "🚀 Ejecutando nuevo contenedor..."
-            sudo docker run -d --name lists-service_container \
+            sudo docker run -d --name lists-service2_container \
               --env DB_USER=${{ secrets.DB_USER }} \
               --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               --env DB_SERVER=${{ secrets.DB_HOST }} \
               --env DB_NAME=${{ secrets.DB_NAME }} \
               -p 5001:5001 \
-              ${{ secrets.DOCKER_USERNAME }}/lists-service:latest
+              ${{ secrets.DOCKER_USERNAME }}/lists-service2:latest
 
             echo "✅ Despliegue completado con éxito."
