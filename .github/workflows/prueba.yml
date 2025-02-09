@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "🚀 Actualizando microservicio en AWS EC2..."
+            echo "🚀 Actualizando microservicio en AWS EC2.."
 
             # Detener y eliminar el contenedor si ya existe
             if sudo docker ps -a --format '{{.Names}}' | grep -q lists-service_container; then
