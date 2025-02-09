@@ -1,12 +1,17 @@
 const List = require('../models/Lists');
 
 const createList = async (req, res) => {
-    console.log('🔍 Body recibido:', req.body);  // Agregar este log para ver qué llega
+    console.log('🔍 Body recibido:', req.body);  // 🚨 Imprimir lo que llega
+
+    if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ message: "❌ No se recibió ningún body en la solicitud" });
+    }
 
     const { nombre, descripcion } = req.body;
 
     if (!nombre) {
-        return res.status(400).json({ message: "El nombre de la lista es obligatorio" });
+        console.log('❌ El campo "nombre" no está en req.body:', req.body);
+        return res.status(400).json({ message: "❌ El campo 'nombre' es obligatorio en el body" });
     }
 
     try {
