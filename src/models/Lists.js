@@ -1,11 +1,26 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
+const pool = require('../config/database'); // ✅ Verifica que este archivo existe
 
-const List = sequelize.define("List", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  board_id: { type: DataTypes.INTEGER, allowNull: false },
-  name: { type: DataTypes.STRING, allowNull: false },
-  position: { type: DataTypes.INTEGER, allowNull: false },
-});
+const List = {
+    createList: async (nombre, descripcion = null) => {
+        try {
+            const query = 'INSERT INTO listas (nombre, descripcion) VALUES ($1, $2) RETURNING *';
+            const result = await pool.query(query, [nombre, descripcion]);
+            return result.rows[0];
+        } catch (error) {
+            console.error('❌ Error en createList:', error);
+            throw new Error(error.message);
+        }
+    },
 
-module.exports = List;
+    getLists: async () => {
+        try {
+            const result = await pool.query('SELECT * FROM listas');
+            return result.rows;
+        } catch (error) {
+            console.error('❌ Error en getLists:', error);
+            throw new Error(error.message);
+        }
+    }
+};
+
+module.exports = List; // ✅ Asegúrate de que esto esté presente

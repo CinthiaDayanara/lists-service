@@ -1,9 +1,30 @@
 {
   "dependencies": {
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "pg": "^8.13.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.5"
-  }
+  },
+  "name": "lists-service",
+  "version": "1.0.0",
+  "description": "This microservice allows **creating lists** in a task management system.\r It provides a REST API for adding new lists to the system and storing them in the database.",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CinthiaDayanara/lists-service.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CinthiaDayanara/lists-service/issues"
+  },
+  "homepage": "https://github.com/CinthiaDayanara/lists-service#readme"
 }
